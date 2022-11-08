@@ -1,4 +1,4 @@
-from api.conf import MAX_LEN_RECIPES_CHARFIELD, MAX_LEN_RECIPES_TEXTFIELD
+from foodgram.conf import MAX_LEN_RECIPES_CHARFIELD, MAX_LEN_RECIPES_TEXTFIELD
 
 from django.contrib.auth import get_user_model
 from django.core.validators import MaxValueValidator, MinValueValidator
@@ -10,12 +10,12 @@ User = get_user_model()
 class Tag(models.Model):
     name = models.CharField(
         verbose_name='Название',
-        max_lenght=MAX_LEN_RECIPES_CHARFIELD
-        unique=True
+        max_length=MAX_LEN_RECIPES_CHARFIELD,
+        unique=True,
     )
     color = models.CharField(
         verbose_name='Цветовой HEX-код',
-        max_lenght=6,
+        max_length=6,
         blank=True,
         null=True,
         default='FFFFFF'
@@ -37,12 +37,12 @@ class Tag(models.Model):
 class Ingredient(models.Model):
     name = models.CharField(
         verbose_name='Название ингридиента',
-        max_lenght=MAX_LEN_RECIPES_CHARFIELD
+        max_length=MAX_LEN_RECIPES_CHARFIELD,
         unique=True
     )
     measure = models.CharField(
         verbose_name='Единицы измерения',
-        max_lenght=MAX_LEN_RECIPES_CHARFIELD
+        max_length=MAX_LEN_RECIPES_CHARFIELD
     )
 
     class Meta:
@@ -69,7 +69,7 @@ class Recipe(models.Model):
     )
     name = models.CharField(
         verbose_name='Название рецепта',
-        max_lenght=MAX_LEN_RECIPES_CHARFIELD
+        max_length=MAX_LEN_RECIPES_CHARFIELD
     )
     image = models.ImageField(
         verbose_name='Изображение для рецепта',
@@ -87,12 +87,12 @@ class Recipe(models.Model):
     )
     description = models.TextField(
         verbose_name='Описание',
-        max_lenght=MAX_LEN_RECIPES_TEXTFIELD
+        max_length=MAX_LEN_RECIPES_TEXTFIELD
     )
     ingredients = models.ManyToManyField(
         Ingredient,
         through='recipes.AmountIngredient',
-        verdose_name='Ингридиенты для рецепта',
+        verbose_name='Ингридиенты для рецепта',
         related_name='ingredients'
     )
     tags = models.ManyToManyField(
