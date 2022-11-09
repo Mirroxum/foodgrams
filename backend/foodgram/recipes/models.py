@@ -51,9 +51,9 @@ class Ingredient(models.Model):
         ordering = ('name', )
         constraints = (
             models.UniqueConstraint(
-                fields=('name', 'measurement_unit'),
+                fields=('name', 'measurement_unit', ),
                 name='unique_for_ingredient'
-            )
+            ),
         )
 
     def __str__(self):
@@ -124,7 +124,7 @@ class Recipe(models.Model):
             models.UniqueConstraint(
                 fields=('name', 'author', ),
                 name='unique_for_author'
-            )
+            ),
         )
 
     def __str__(self):
@@ -159,7 +159,7 @@ class AmountIngredient(models.Model):
     class Meta:
         constraints = (
             models.UniqueConstraint(
-                fields=('recipe', 'ingridients', ),
+                fields=('recipe', 'ingredients', ),
                 name='%(app_label)s_%(class)s ingredient alredy added\n',
-            )
+            ),
         )

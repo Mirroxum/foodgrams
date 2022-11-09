@@ -1,7 +1,6 @@
 import csv
 import io
 
-from django.db.utils import IntegrityError
 from recipes.models import Ingredient
 
 DIC = {
@@ -46,7 +45,7 @@ def run():
                     _, s = key.objects.get_or_create(**row)
                     if s:
                         successful += 1
-                except IntegrityError as e:
+                except Exception as e:
                     print(f'Failed with error: {e}')
                     failed += 1
 
