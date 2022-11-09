@@ -5,3 +5,4 @@ USERS_HELP_EMAIL = 'Укажите свой адрес электронной п
 MAX_LEN_USERS_CHARFIELD = 20
 USERS_HELP_UNAME = 'Укажите свой username'
 USERS_HELP_FNAME = 'Укажите свое настоящее имя'
+EMPTY_VALUE = '--Пусто--'

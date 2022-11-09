@@ -13,11 +13,6 @@ DIC = {
 ERASE_ALL = True
 
 
-def get_fields(row):
-    row['name'] = Ingredient.objects.get(pk=row['name'])
-    return row
-
-
 def run():
     for key in DIC:
         if ERASE_ALL:
@@ -33,8 +28,7 @@ def run():
             for row in reader:
                 try:
                     temp_row = dict(zip(header, row))
-                    row_fixed = get_fields(temp_row)
-                    data.append(row_fixed)
+                    data.append(temp_row)
                 except Exception as e:
                     print(f'Failed with error: {e}')
 
