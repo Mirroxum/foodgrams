@@ -1,7 +1,7 @@
 requests==2.26.0
 django-extensions==2.2.6
 django==2.2.16
-djangorestframework==3.12.4
+djangorestframework==3.13.1
 pytest==6.2.4
 pytest-django==4.4.0
 pytest-pythonpath==0.7.3
