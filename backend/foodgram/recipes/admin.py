@@ -19,7 +19,7 @@ class LinksAdmin(ModelAdmin):
 @register(Ingredient)
 class IngredientAdmin(ModelAdmin):
     list_display = (
-        'name', 'measure',
+        'name', 'measurement_unit',
     )
     search_fields = (
         'name',
@@ -37,9 +37,9 @@ class RecipeAdmin(ModelAdmin):
         'name',
     )
     fields = (
-        ('name', 'time_cooking',),
+        ('name', 'cooking_time',),
         ('author', 'tags',),
-        ('description',),
+        ('text',),
         ('image',),
     )
     raw_id_fields = ('author', )

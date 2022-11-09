@@ -2,131 +2,105 @@ import datetime as dt
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import check_password
-from django.db.models import Q, Avg
+from django.db.models import F, Q, Avg
 from rest_framework import serializers
-from rest_framework.validators import UniqueValidator
+from rest_framework.validators import UniqueTogetherValidator
+from drf_extra_fields.fields import Base64ImageField
 
-from recipes.models import Tag, Recipe, Ingredient
+from users.models import MyUser
+from recipes.models import Tag, Recipe, Ingredient 
 from foodgram.conf import MAX_LENGTH_MED_SERIALIZE, MAX_LENGTH_LONG_SERIALIZE
 from .validators import NotFoundValidationError, username_restriction
-
+from .utils import is_hex_color
 
 User = get_user_model()
 
 
-# class UserSerializer(serializers.ModelSerializer):
-#     username = serializers.CharField(
-#         max_length=MAX_LENGTH_MED_SERIALIZE,
-#         validators=[
-#             UniqueValidator(queryset=User.objects.all()),
-#             username_restriction,
-#         ],
-#     )
-#     email = serializers.EmailField(
-#         max_length=MAX_LENGTH_LONG_SERIALIZE,
-#         validators=[UniqueValidator(queryset=User.objects.all())],
-#     )
-
-#     class Meta:
-#         fields = (
-#             'username',
-#             'first_name',
-#             'last_name',
-#             'email',
-#             'role',
-#         )
-#         model = User
-
-
-# class UserSelfSerializer(serializers.ModelSerializer):
-#     username = serializers.CharField(
-#         max_length=MAX_LENGTH_MED_SERIALIZE,
-#         validators=[
-#             UniqueValidator(
-#                 queryset=User.objects.filter(access_code__isnull=False)
-#             ),
-#             username_restriction,
-#         ],
-#     )
-#     email = serializers.EmailField(
-#         max_length=MAX_LENGTH_LONG_SERIALIZE,
-#         validators=[
-#             UniqueValidator(
-#                 queryset=User.objects.filter(access_code__isnull=False)
-#             )
-#         ],
-#         required=True,
-#     )
-#     role = serializers.CharField(max_length=MAX_LENGTH_MED_SERIALIZE, read_only=True)
-
-#     class Meta:
-#         fields = (
-#             'username',
-#             'first_name',
-#             'last_name',
-#             'email',
-#             'role',
-#         )
-#         model = User
-
-
-# class EmailRegistration(serializers.Serializer):
-#     email = serializers.EmailField(
-#         max_length=MAX_LENGTH_LONG_SERIALIZE,
-#     )
-#     username = serializers.CharField(
-#         max_length=MAX_LENGTH_MED_SERIALIZE,
-#         validators=[
-#             username_restriction,
-#         ],
-#     )
-
-#     def validate(self, data):
-#         email = data.get('email')
-#         username = data.get('username')
-#         duplicate_email = (
-#             User.objects.filter(Q(email=email))
-#             .filter(~Q(username=username))
-#             .exists()
-#         )
-#         duplicate_username = (
-#             User.objects.filter(Q(username=username))
-#             .filter(~Q(email=email))
-#             .exists()
-#         )
-#         if duplicate_email:
-#             raise serializers.ValidationError(
-#                 {'detail': 'Email is already taken.'}
-#             )
-#         if duplicate_username:
-#             raise serializers.ValidationError(
-#                 {'detail': 'Username is already taken.'}
-#             )
-#         return data
-
-
-# class LoginUserSerializer(serializers.Serializer):
-#     username = serializers.CharField()
-#     confirmation_code = serializers.CharField(write_only=True)
-
-#     def validate(self, data):
-#         user = User.objects.filter(username=data['username']).first()
-#         if user == None:
-#             raise NotFoundValidationError({'detail': 'User not found'})
-#         check_access_code = check_password(
-#             data['confirmation_code'], user.access_code
-#         )
-#         if not check_access_code:
-#             raise serializers.ValidationError(
-#                 {'detail': 'Incorrect username or access_code'}
-#             )
-#         return data
-
-
-class TagSerializer(serializers.ModelSerializer):
-    color = serializers.SlugRelatedField(
-        read_only=True, slug_field='username'
-    )
+class UserSerializer(serializers.ModelSerializer):
+    is_subscribed = serializers.SerializerMethodField()
     class Meta:
-        fields = ('id', 'name', 'clolor', 'slug')
+        model = MyUser
+        fields = (
+            'id',
+            'email',
+            'username',
+            'first_name',
+            'last_name',
+            'is_subscribed',
+        )
+        read_only_fields = ('is_subscribed', )
+
+    def get_is_subscribed(self, obj):
+        user = self.context.get('request').user
+        if user.is_anonymous or (user == obj):
+            return False
+        return user.subscribe.filter(id=obj.id).exists()
+
+    # def create(self, validated_data):
+    #     user = User(
+    #         email=validated_data['email'],
+    #         username=validated_data['username'],
+    #         first_name=validated_data['first_name'],
+    #         last_name=validated_data['last_name'],
+    #     )
+    #     user.set_password(validated_data['password'])
+    #     user.save()
+    #     return user
+class TagSerializer(serializers.ModelSerializer):
+    class Meta:
+        fields = ('id', 'name', 'color', 'slug')
+        read_only_fields = ('id', 'name', 'clolor', 'slug')
         model = Tag
+
+    def validate_color(self, color):
+        color = str(color).strip(' #')
+        is_hex_color(color)
+        return f'#{color}'
+
+class IngredientSerializer(serializers.ModelSerializer):
+    class Meta:
+        fields = ('id', 'name', 'measurement_unit')
+        read_only_fields = ('id', 'name', 'measurement_unit')
+        model = Ingredient
+
+class RecipeSerializer(serializers.ModelSerializer):
+    tags = TagSerializer(many=True, read_only=True)
+    author = UserSerializer(read_only=True)
+    ingredients = serializers.SerializerMethodField()
+    is_favorited = serializers.SerializerMethodField()
+    is_in_shopping_cart = serializers.SerializerMethodField()
+    image = Base64ImageField()
+
+    class Meta:
+        fields = (
+            'id',
+            'tags',
+            'author',
+            'ingredients',
+            'is_favorited',
+            'is_in_shopping_cart',
+            'name',
+            'image',
+            'text',
+            'cooking_time')
+        read_only_fields = (
+            'is_favorited',
+            'is_in_shopping_cart'
+        )
+        model = Recipe
+
+    def get_ingredients(self, obj):
+        ingredients = obj.ingredients.values(
+            'id', 'name', 'measurement_unit', amount=F('ingredient__amount')
+        )
+        return ingredients
+
+    def get_is_favorited(self, obj):
+        user = self.context.get('request').user
+        return False if user.is_anonymous else user.favorites.filter(
+            id=obj.id).exists()
+
+    def get_is_in_shopping_cart(self, obj):
+        user = self.context.get('request').user
+        return False if user.is_anonymous else user.carts.filter(
+            id=obj.id).exists()

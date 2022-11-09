@@ -15,13 +15,13 @@ class Tag(models.Model):
     )
     color = models.CharField(
         verbose_name='Цветовой HEX-код',
-        max_length=6,
+        max_length=7,
         blank=True,
         null=True,
-        default='FFFFFF'
+        default='#FFFFFF'
     )
     slug = models.SlugField(
-        verbose_name='Слаг тэга',
+        verbose_name='Slug тега',
         unique=True
     )
 
@@ -40,7 +40,7 @@ class Ingredient(models.Model):
         max_length=MAX_LEN_RECIPES_CHARFIELD,
         unique=True
     )
-    measure = models.CharField(
+    measurement_unit = models.CharField(
         verbose_name='Единицы измерения',
         max_length=MAX_LEN_RECIPES_CHARFIELD
     )
@@ -51,13 +51,13 @@ class Ingredient(models.Model):
         ordering = ('name', )
         constraints = (
             models.UniqueConstraint(
-                fields=('name', 'measure', ),
+                fields=('name', 'measurement_unit', ),
                 name='unique_for_ingredient'
             ),
         )
 
     def __str__(self):
-        return f'{self.name}, {self.measure}'
+        return f'{self.name}, {self.measurement_unit}'
 
 
 class Recipe(models.Model):
@@ -73,7 +73,7 @@ class Recipe(models.Model):
     )
     image = models.ImageField(
         verbose_name='Изображение для рецепта',
-        upload_to='images_recipe/',
+        upload_to='media/recipes/images/',
     )
     favorite = models.ManyToManyField(
         User,
@@ -85,7 +85,7 @@ class Recipe(models.Model):
         related_name='carts',
         to=User,
     )
-    description = models.TextField(
+    text = models.TextField(
         verbose_name='Описание',
         max_length=MAX_LEN_RECIPES_TEXTFIELD
     )
@@ -104,7 +104,7 @@ class Recipe(models.Model):
         verbose_name='Дата публикации',
         auto_now_add=True,
     )
-    time_cooking = models.PositiveSmallIntegerField(
+    cooking_time = models.PositiveSmallIntegerField(
         verbose_name='Время приготовления в минутах',
         validators=(
             MinValueValidator(

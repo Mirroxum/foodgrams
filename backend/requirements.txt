@@ -14,3 +14,4 @@ asgiref==3.2.10
 pytz==2020.1
 sqlparse==0.3.1
 Pillow==8.4.0
+drf-extra-fields==3.4.1
