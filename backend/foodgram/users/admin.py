@@ -14,6 +14,7 @@ class MyUserAdmin(UserAdmin):
     fields = (
         ('username', 'email',),
         ('first_name', 'last_name', ),
+        ('role',),
     )
     fieldsets = []
     search_fields = (
