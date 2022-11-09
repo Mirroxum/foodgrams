@@ -33,7 +33,6 @@ ALLOWED_HOSTS = ['127.0.0.1']
 INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
-    'djoser',
     'django_filters',
     'django_extensions',
     'api.apps.ApiConfig',
@@ -45,6 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'djoser',
 ]
 
 MIDDLEWARE = [
@@ -112,29 +112,29 @@ AUTH_USER_MODEL = 'users.MyUser'
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES':
     ['rest_framework.authentication.TokenAuthentication', ],
-    # 'DEFAULT_PERMISSION_CLASSES':
-    # ['rest_framework.permissions.IsAuthenticatedOrReadOnly', ],
-    # 'DEFAULT_PAGINATION_CLASS':
-    #     'rest_framework.pagination.PageNumberPagination',
-    # 'PAGE_SIZE': 5,
+    'DEFAULT_PERMISSION_CLASSES':
+    ['rest_framework.permissions.IsAuthenticatedOrReadOnly', ],
+    'DEFAULT_PAGINATION_CLASS':
+        'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 5,
 }
 
-# DJOSER = {
-#     'LOGIN_FIELD': 'email',
-#     'HIDE_USERS': False,
-#     'PERMISSIONS': {
-#         'resipe': ('api.permissions.AuthorStaffOrReadOnly,',),
-#         'recipe_list': ('api.permissions.AuthorStaffOrReadOnly',),
-#         'user': ('api.permissions.OwnerUserOrReadOnly',),
-#         'user_list': ('api.permissions.OwnerUserOrReadOnly',),
-#     },
-#     'SERIALIZERS': {
-#         'user': 'api.serializers.UserSerializer',
-#         'user_list': 'api.serializers.UserSerializer',
-#         'current_user': 'api.serializers.UserSerializer',
-#         'user_create': 'api.serializers.UserSerializer',
-#     },
-# }
+DJOSER = {
+    'LOGIN_FIELD': 'email',
+    'HIDE_USERS': False,
+    'PERMISSIONS': {
+        'resipe': ('api.permissions.AuthorStaffOrReadOnly,',),
+        'recipe_list': ('api.permissions.AuthorStaffOrReadOnly',),
+        'user': ('api.permissions.OwnerUserOrReadOnly',),
+        'user_list': ('api.permissions.OwnerUserOrReadOnly',),
+    },
+    'SERIALIZERS': {
+        'user': 'api.serializers.UserSerializer',
+        'user_list': 'api.serializers.UserSerializer',
+        'current_user': 'api.serializers.UserSerializer',
+        'user_create': 'api.serializers.UserSerializer',
+    },
+}
 
 
 # Internationalization
