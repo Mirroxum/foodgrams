@@ -125,8 +125,8 @@ DJOSER = {
     'PERMISSIONS': {
         'resipe': ('api.permissions.IsAuthorModeratorAdminOrReadOnly,',),
         'recipe_list': ('api.permissions.IsAuthorModeratorAdminOrReadOnly',),
-        'user': ('api.permissions.IsSelf',),
-        'user_list': ('api.permissions.IsSelf',),
+        'user': ('rest_framework.permissions.IsAuthenticated',),
+        'user_list': ('rest_framework.permissions.IsAuthenticated',),
     },
     'SERIALIZERS': {
         'user': 'api.serializers.UserSerializer',

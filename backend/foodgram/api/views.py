@@ -11,9 +11,9 @@ from rest_framework.response import Response
 from recipes.models import Ingredient, Recipe, Tag
 from users.models import MyUser
 from .serializers import (TagSerializer, IngredientSerializer,
-                          RecipeSerializer, UserSubscribeSerializer,
+                          RecipeCreateSerializer, UserSubscribeSerializer,
                           UserSerializer)
-from .permissions import IsAdminOrReadOnly
+from .permissions import IsAdminOrReadOnly, IsAuthorModeratorAdminOrReadOnly
 from .paginators import PageLimitPagination
 
 User = get_user_model()
@@ -36,7 +36,6 @@ class UserViewSet(DjoserUserViewSet):
             }, status=status.HTTP_400_BAD_REQUEST)
         user.subscribe.add(author)
         follow = user.subscribe.get(id=author.id)
-        print(follow)
         serializer = UserSubscribeSerializer(
             follow, context={'request': request}
         )
@@ -77,15 +76,18 @@ class TagViewSet(ReadOnlyModelViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
     permission_classes = (IsAdminOrReadOnly, )
+    pagination_class = PageLimitPagination
 
 
 class IngredientViewSet(ReadOnlyModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
     permission_classes = (IsAdminOrReadOnly, )
+    pagination_class = PageLimitPagination
 
 
 class RecipeViewSet(ModelViewSet):
-    queryset = Recipe.objects.all()
-    serializer_class = RecipeSerializer
-    permission_classes = (IsAdminOrReadOnly, )
+    queryset = Recipe.objects.select_related('author')
+    serializer_class = RecipeCreateSerializer
+    permission_classes = (IsAuthorModeratorAdminOrReadOnly, )
+    pagination_class = PageLimitPagination
