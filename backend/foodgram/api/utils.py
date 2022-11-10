@@ -4,6 +4,7 @@
 from string import hexdigits
 from rest_framework.serializers import ValidationError
 
+
 def is_hex_color(value):
     if len(value) not in (3, 6):
         raise ValidationError(
