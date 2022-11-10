@@ -1,14 +1,10 @@
 from django.contrib.auth import get_user_model
-from django.contrib.auth.hashers import check_password
 from django.db.models import F
 from rest_framework import serializers
-from rest_framework.validators import UniqueTogetherValidator
 from drf_extra_fields.fields import Base64ImageField
 
 from users.models import MyUser
 from recipes.models import Tag, Recipe, Ingredient
-# from foodgram.conf import MAX_LENGTH_MED_SERIALIZE, MAX_LENGTH_LONG_SERIALIZE
-from .validators import NotFoundValidationError, username_restriction
 from .utils import is_hex_color
 
 User = get_user_model()

@@ -10,7 +10,9 @@ from rest_framework.response import Response
 
 from recipes.models import Ingredient, Recipe, Tag
 from users.models import MyUser
-from .serializers import TagSerializer, IngredientSerializer, RecipeSerializer, UserSubscribeSerializer
+from .serializers import (TagSerializer, IngredientSerializer,
+                          RecipeSerializer, UserSubscribeSerializer,
+                          UserSerializer)
 from .permissions import IsAdminOrReadOnly
 from .paginators import PageLimitPagination
 
@@ -20,7 +22,7 @@ User = get_user_model()
 class UserViewSet(DjoserUserViewSet):
     pagination_class = PageLimitPagination
 
-    @action(detail=True, permission_classes=[IsAuthenticated])
+    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
     def subscribe(self, request, id=None):
         user = request.user
         author = get_object_or_404(User, id=id)
@@ -28,11 +30,13 @@ class UserViewSet(DjoserUserViewSet):
             return Response({
                 'errors': 'Вы не можете подписываться на самого себя'
             }, status=status.HTTP_400_BAD_REQUEST)
-        if user.subscribe.filter(subscribers__in=[author]).exists():
+        if user.subscribe.filter(id=author.id).exists():
             return Response({
                 'errors': 'Вы уже подписаны на данного пользователя'
             }, status=status.HTTP_400_BAD_REQUEST)
-        follow = user.subscribe.add(author)
+        user.subscribe.add(author)
+        follow = user.subscribe.get(id=author.id)
+        print(follow)
         serializer = UserSubscribeSerializer(
             follow, context={'request': request}
         )
@@ -46,11 +50,11 @@ class UserViewSet(DjoserUserViewSet):
             return Response({
                 'errors': 'Вы не можете отписываться от самого себя'
             }, status=status.HTTP_400_BAD_REQUEST)
-        follow = user.subscribe.filter(subscribers__in=[author])
-        if follow.exists():
-            follow.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-
+        if user.subscribe.filter(id=author.id).exists():
+            user.subscribe.remove(author)
+            return Response({
+                'success': 'Успешная отписка'
+            }, status=status.HTTP_204_NO_CONTENT)
         return Response({
             'errors': 'Вы уже отписались'
         }, status=status.HTTP_400_BAD_REQUEST)
