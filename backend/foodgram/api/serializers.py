@@ -3,6 +3,7 @@ from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
 from django.db.models import F
 from rest_framework import serializers
+from rest_framework.validators import UniqueTogetherValidator
 from drf_extra_fields.fields import Base64ImageField
 
 from users.models import MyUser
@@ -155,6 +156,12 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         model = Recipe
         fields = ('ingredients', 'tags', 'image',
                   'name', 'text', 'cooking_time', 'author')
+        validators = [
+            UniqueTogetherValidator(
+                queryset=Recipe.objects.all().select_related('author'),
+                fields=['author', 'name']
+            )
+        ]
 
     def create(self, validated_data):
         ingredients = validated_data.pop('ingredients')
@@ -172,28 +179,32 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         return recipe
 
     def update(self, instance, validated_data):
+        print(validated_data)
         instance.image = validated_data.get('image', instance.image)
         instance.name = validated_data.get('name', instance.name)
         instance.text = validated_data.get('text', instance.text)
         instance.cooking_time = validated_data.get(
             'cooking_time', instance.cooking_time
         )
-        tags_data = validated_data.pop('tags')
-        ingredients_data = validated_data.pop('ingredients')
-        instance.tags.clear()
-        instance.ingredients.clear()
-        for tag in tags_data:
-            tag_id = tag.id
-            tag_object = get_object_or_404(Tag, id=tag_id)
-            instance.tags.add(tag_object)
-        for ingredient in ingredients_data:
-            ingredient_id = ingredient.get('id')
-            amount = ingredient.get('amount')
-            ingredient_object = get_object_or_404(Ingredient, id=ingredient_id)
-            instance.ingredients.add(
-                ingredient_object,
-                through_defaults={'amount': amount}
-            )
+        if validated_data.get('tags'):
+            tags_data = validated_data.pop('tags')
+            instance.tags.clear()
+            for tag in tags_data:
+                tag_id = tag.id
+                tag_object = get_object_or_404(Tag, id=tag_id)
+                instance.tags.add(tag_object)
+        if validated_data.get('ingredients'):
+            ingredients_data = validated_data.pop('ingredients')
+            instance.ingredients.clear()
+            for ingredient in ingredients_data:
+                ingredient_id = ingredient.get('id')
+                amount = ingredient.get('amount')
+                ingredient_object = get_object_or_404(
+                    Ingredient, id=ingredient_id)
+                instance.ingredients.add(
+                    ingredient_object,
+                    through_defaults={'amount': amount}
+                )
         instance.save()
         return instance
 

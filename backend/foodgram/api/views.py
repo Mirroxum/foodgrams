@@ -91,3 +91,4 @@ class RecipeViewSet(ModelViewSet):
     serializer_class = RecipeCreateSerializer
     permission_classes = (IsAuthorModeratorAdminOrReadOnly, )
     pagination_class = PageLimitPagination
+    http_method_names = ['get', 'post', 'patch', 'delete', 'head', 'options']
