@@ -20,40 +20,40 @@ User = get_user_model()
 class UserViewSet(DjoserUserViewSet):
     pagination_class = PageLimitPagination
 
-    # @action(detail=True, permission_classes=[IsAuthenticated])
-    # def subscribe(self, request, id=None):
-    #     user = request.user
-    #     author = get_object_or_404(User, id=id)
-    #     if user == author:
-    #         return Response({
-    #             'errors': 'Вы не можете подписываться на самого себя'
-    #         }, status=status.HTTP_400_BAD_REQUEST)
-    #     if user.subscribe.filter(subscribers__in=[author]).exists():
-    #         return Response({
-    #             'errors': 'Вы уже подписаны на данного пользователя'
-    #         }, status=status.HTTP_400_BAD_REQUEST)
-    #     follow = Follow.objects.create(user=user, author=author)
-    #     serializer = UserSubscribeSerializer(
-    #         follow, context={'request': request}
-    #     )
-    #     return Response(serializer.data, status=status.HTTP_201_CREATED)
+    @action(detail=True, permission_classes=[IsAuthenticated])
+    def subscribe(self, request, id=None):
+        user = request.user
+        author = get_object_or_404(User, id=id)
+        if user == author:
+            return Response({
+                'errors': 'Вы не можете подписываться на самого себя'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        if user.subscribe.filter(subscribers__in=[author]).exists():
+            return Response({
+                'errors': 'Вы уже подписаны на данного пользователя'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        follow = user.subscribe.add(author)
+        serializer = UserSubscribeSerializer(
+            follow, context={'request': request}
+        )
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    # @subscribe.mapping.delete
-    # def del_subscribe(self, request, id=None):
-    #     user = request.user
-    #     author = get_object_or_404(User, id=id)
-    #     if user == author:
-    #         return Response({
-    #             'errors': 'Вы не можете отписываться от самого себя'
-    #         }, status=status.HTTP_400_BAD_REQUEST)
-    #     follow = user.subscribe.filter(subscribers__in=[author])
-    #     if follow.exists():
-    #         follow.delete()
-    #         return Response(status=status.HTTP_204_NO_CONTENT)
+    @subscribe.mapping.delete
+    def del_subscribe(self, request, id=None):
+        user = request.user
+        author = get_object_or_404(User, id=id)
+        if user == author:
+            return Response({
+                'errors': 'Вы не можете отписываться от самого себя'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        follow = user.subscribe.filter(subscribers__in=[author])
+        if follow.exists():
+            follow.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
 
-    #     return Response({
-    #         'errors': 'Вы уже отписались'
-    #     }, status=status.HTTP_400_BAD_REQUEST)
+        return Response({
+            'errors': 'Вы уже отписались'
+        }, status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=False, permission_classes=[IsAuthenticated])
     def subscriptions(self, request):
