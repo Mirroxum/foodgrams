@@ -40,7 +40,10 @@ class MyUser(AbstractUser):
         symmetrical=False
     )
     role = models.CharField(
-        choices=ROLES_CHOICES, default='user', max_length=14
+        choices=ROLES_CHOICES,
+        default='user',
+        verbose_name='Роль',
+        max_length=14
     )
     access_code = models.CharField(
         max_length=8, default=None, blank=True, null=True

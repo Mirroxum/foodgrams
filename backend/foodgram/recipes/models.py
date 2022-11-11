@@ -26,8 +26,8 @@ class Tag(models.Model):
     )
 
     class Meta:
-        verbose_name = 'Тег',
-        verbose_name_plural = 'Теги',
+        verbose_name = 'Тег'
+        verbose_name_plural = 'Теги'
         ordering = ('name', )
 
     def __str__(self):
@@ -46,8 +46,8 @@ class Ingredient(models.Model):
     )
 
     class Meta:
-        verbose_name = 'Ингридиент',
-        verbose_name_plural = 'Ингридиенты',
+        verbose_name = 'Ингридиент'
+        verbose_name_plural = 'Ингридиенты'
         ordering = ('name', )
         constraints = (
             models.UniqueConstraint(
@@ -117,9 +117,9 @@ class Recipe(models.Model):
     )
 
     class Meta:
-        verbose_name = 'Рецепт',
-        verbose_name_plural = 'Рецепты',
-        ordering = ('-pub_date'),
+        verbose_name = 'Рецепт'
+        verbose_name_plural = 'Рецепты'
+        ordering = ('-pub_date',)
         constraints = (
             models.UniqueConstraint(
                 fields=('name', 'author', ),

@@ -11,11 +11,6 @@ class IngredientInline(TabularInline):
     extra = 3
 
 
-@register(AmountIngredient)
-class LinksAdmin(ModelAdmin):
-    pass
-
-
 @register(Ingredient)
 class IngredientAdmin(ModelAdmin):
     list_display = (
@@ -34,7 +29,7 @@ class IngredientAdmin(ModelAdmin):
 @register(Recipe)
 class RecipeAdmin(ModelAdmin):
     list_display = (
-        'name',
+        'id', 'name', 'author', 'is_favorited'
     )
     fields = (
         ('name', 'cooking_time',),
@@ -47,11 +42,14 @@ class RecipeAdmin(ModelAdmin):
         'name', 'author',
     )
     list_filter = (
-        'name', 'author__username',
+        'name', 'author__username', 'tags'
     )
     inlines = (IngredientInline,)
     save_on_top = True
     empty_value_display = EMPTY_VALUE
+
+    def is_favorited(self, obj):
+        return obj.favorite.count()
 
 
 @register(Tag)

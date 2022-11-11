@@ -21,5 +21,5 @@ class MyUserAdmin(UserAdmin):
     search_fields = (
         'username', 'email',
     )
-    list_filter = ('role',)
+    list_filter = ('role', 'username', 'email')
     empty_value_display = EMPTY_VALUE
