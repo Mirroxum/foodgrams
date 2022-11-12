@@ -4,15 +4,14 @@ from django.contrib.auth import get_user_model
 from django.db.models import F, Sum
 from django.http.response import HttpResponse
 from rest_framework.decorators import action
-from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
+from rest_framework.viewsets import (ModelViewSet, ReadOnlyModelViewSet,
+                                     GenericViewSet)
 from rest_framework import status
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from djoser.views import UserViewSet as DjoserUserViewSet
 
 from recipes.models import Ingredient, Recipe, Tag, AmountIngredient
-from users.models import MyUser
 from .serializers import (TagSerializer, IngredientSerializer,
                           RecipeCreateSerializer, UserSubscribeSerializer,
                           ShortRecipeSerializer)
@@ -22,15 +21,17 @@ from .paginators import PageLimitPagination
 User = get_user_model()
 
 
-class UserViewSet(DjoserUserViewSet):
+class UserSubscribeViewSet(GenericViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSubscribeSerializer
     pagination_class = PageLimitPagination
 
     @action(detail=True,
             methods=['post'],
             permission_classes=[IsAuthenticated])
-    def subscribe(self, request, id=None):
+    def subscribe(self, request, pk=None):
         user = request.user
-        author = get_object_or_404(User, id=id)
+        author = get_object_or_404(User, id=pk)
         if user == author:
             return Response({
                 'errors': 'Вы не можете подписываться на самого себя'
@@ -41,15 +42,15 @@ class UserViewSet(DjoserUserViewSet):
             }, status=status.HTTP_400_BAD_REQUEST)
         user.subscribe.add(author)
         follow = user.subscribe.get(id=author.id)
-        serializer = UserSubscribeSerializer(
+        serializer = self.get_serializer(
             follow, context={'request': request}
         )
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     @subscribe.mapping.delete
-    def del_subscribe(self, request, id=None):
+    def del_subscribe(self, request, pk=None):
         user = request.user
-        author = get_object_or_404(User, id=id)
+        author = get_object_or_404(User, id=pk)
         is_subscribe = user.subscribe.filter(id=author.id).exists()
         if user == author:
             return Response({
@@ -67,14 +68,13 @@ class UserViewSet(DjoserUserViewSet):
     @action(detail=False, permission_classes=[IsAuthenticated, ])
     def subscriptions(self, request):
         user = request.user
-        queryset = MyUser.objects.filter(subscribers__in=[user])
+        queryset = User.objects.filter(subscribers__in=[user])
         pages = self.paginate_queryset(queryset)
-        serializer = UserSubscribeSerializer(
+        serializer = self.get_serializer(
             pages,
             many=True,
             context={'request': request}
         )
-        print(queryset)
         return self.get_paginated_response(serializer.data)
 
 
@@ -136,12 +136,12 @@ class RecipeViewSet(ModelViewSet):
     def shopping_cart(self, request, pk):
         user = self.request.user
         recipe = get_object_or_404(Recipe, pk=pk)
-        is_cart = recipe.cart.filter(id=user.id).exists()
+        is_cart = recipe.carts.filter(id=user.id).exists()
         if is_cart:
             return Response({
                 'errors': 'Вы уже добавили этот рецепт в список покупок'
             }, status=status.HTTP_400_BAD_REQUEST)
-        recipe.cart.add(user)
+        user.cart.add(recipe)
         serializer = ShortRecipeSerializer(recipe)
         return Response(
             data=serializer.data,
@@ -152,11 +152,11 @@ class RecipeViewSet(ModelViewSet):
     def del_shopping_cart(self, request, pk):
         user = self.request.user
         recipe = get_object_or_404(Recipe, pk=pk)
-        is_cart = recipe.cart.filter(id=user.id).exists()
+        is_cart = recipe.carts.filter(id=user.id).exists()
         if not is_cart:
             data = {'errors': 'Такого рецепта нет в списке покупок.'}
             return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
-        recipe.cart.remove(user)
+        user.cart.remove(recipe)
         return Response({
             'success': 'Рецепт успешно удален из списка покупок'
         }, status=status.HTTP_204_NO_CONTENT)

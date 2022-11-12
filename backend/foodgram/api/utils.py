@@ -1,6 +1,3 @@
-"""Вспомогательные функции.
-"""
-
 from string import hexdigits
 from rest_framework.serializers import ValidationError
 

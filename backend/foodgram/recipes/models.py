@@ -1,9 +1,9 @@
-from foodgram.conf import MAX_LEN_RECIPES_CHARFIELD, MAX_LEN_RECIPES_TEXTFIELD
-
 from django.contrib.auth import get_user_model
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
+from foodgram.conf import MAX_LEN_RECIPES_CHARFIELD, MAX_LEN_RECIPES_TEXTFIELD
+# from users.models import User
 User = get_user_model()
 
 
@@ -69,7 +69,8 @@ class Recipe(models.Model):
     )
     name = models.CharField(
         verbose_name='Название рецепта',
-        max_length=MAX_LEN_RECIPES_CHARFIELD
+        max_length=MAX_LEN_RECIPES_CHARFIELD,
+        unique=True
     )
     image = models.ImageField(
         verbose_name='Изображение для рецепта',
@@ -80,11 +81,6 @@ class Recipe(models.Model):
         verbose_name='Избранные рецепты',
         related_name='favorites'
     )
-    cart = models.ManyToManyField(
-        verbose_name='Список покупок',
-        related_name='carts',
-        to=User,
-    )
     text = models.TextField(
         verbose_name='Описание',
         max_length=MAX_LEN_RECIPES_TEXTFIELD
@@ -93,12 +89,10 @@ class Recipe(models.Model):
         Ingredient,
         through='recipes.AmountIngredient',
         verbose_name='Ингридиенты для рецепта',
-        related_name='ingredients'
     )
     tags = models.ManyToManyField(
         Tag,
         verbose_name='Теги',
-        related_name='tags'
     )
     pub_date = models.DateTimeField(
         verbose_name='Дата публикации',
@@ -135,13 +129,11 @@ class AmountIngredient(models.Model):
     recipe = models.ForeignKey(
         Recipe,
         verbose_name='В каких рецептах',
-        related_name='recipe',
         on_delete=models.CASCADE,
     )
     ingredients = models.ForeignKey(
         Ingredient,
         verbose_name='Связанные ингредиенты',
-        related_name='ingredient',
         on_delete=models.CASCADE,
     )
     amount = models.PositiveSmallIntegerField(

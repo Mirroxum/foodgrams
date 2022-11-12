@@ -6,15 +6,12 @@ SECRET_KEY = 'ls@4&k&_)twqv)gp)20(-u2h5b!pq1fc9dd@u!e^9(x3ggl)+s'
 
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
 INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'django_filters',
-    'api.apps.ApiConfig',
-    'recipes.apps.RecipesConfig',
-    'users.apps.UsersConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -23,6 +20,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'djoser',
     'django_extensions',
+    'api.apps.ApiConfig',
+    'recipes.apps.RecipesConfig',
 ]
 
 MIDDLEWARE = [
@@ -82,7 +81,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-AUTH_USER_MODEL = 'users.MyUser'
+AUTH_USER_MODEL = 'recipes.User'
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES':
@@ -91,23 +90,19 @@ REST_FRAMEWORK = {
     ('rest_framework.permissions.IsAuthenticatedOrReadOnly', ),
     'DEFAULT_PAGINATION_CLASS':
         'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 5,
+    'PAGE_SIZE': 6,
 }
 
 DJOSER = {
     'LOGIN_FIELD': 'email',
     'HIDE_USERS': False,
     'PERMISSIONS': {
-        'resipe': ('api.permissions.IsAuthorModeratorAdminOrReadOnly,',),
-        'recipe_list': ('api.permissions.IsAuthorModeratorAdminOrReadOnly',),
         'user': ('rest_framework.permissions.IsAuthenticated',),
-        'user_list': ('rest_framework.permissions.IsAuthenticated',),
     },
     'SERIALIZERS': {
         'user': 'api.serializers.UserSerializer',
         'user_list': 'api.serializers.UserSerializer',
         'current_user': 'api.serializers.UserSerializer',
-        'user_create': 'api.serializers.UserSerializer',
     },
 }
 

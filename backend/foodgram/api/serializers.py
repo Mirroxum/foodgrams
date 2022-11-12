@@ -1,14 +1,11 @@
 from django.shortcuts import get_object_or_404
-
 from django.contrib.auth import get_user_model
 from django.db.models import F
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 from drf_extra_fields.fields import Base64ImageField
 
-from users.models import MyUser
 from recipes.models import Tag, Recipe, Ingredient, AmountIngredient
-from .utils import is_hex_color
 
 User = get_user_model()
 
@@ -17,7 +14,7 @@ class UserSerializer(serializers.ModelSerializer):
     is_subscribed = serializers.SerializerMethodField()
 
     class Meta:
-        model = MyUser
+        model = User
         fields = (
             'id',
             'email',
@@ -72,13 +69,8 @@ class UserSubscribeSerializer(UserSerializer):
 class TagSerializer(serializers.ModelSerializer):
     class Meta:
         fields = ('id', 'name', 'color', 'slug')
-        read_only_fields = ('id', 'name', 'clolor', 'slug')
+        read_only_fields = ('id', 'name', 'color', 'slug')
         model = Tag
-
-    def validate_color(self, color):
-        color = str(color).strip(' #')
-        is_hex_color(color)
-        return f'#{color}'
 
 
 class IngredientSerializer(serializers.ModelSerializer):
@@ -179,7 +171,6 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         return recipe
 
     def update(self, instance, validated_data):
-        print(validated_data)
         instance.image = validated_data.get('image', instance.image)
         instance.name = validated_data.get('name', instance.name)
         instance.text = validated_data.get('text', instance.text)
