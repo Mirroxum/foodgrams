@@ -2,10 +2,10 @@ from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
 from django.db.models import F
 from rest_framework import serializers
-from rest_framework.validators import UniqueTogetherValidator
+from rest_framework.validators import UniqueValidator
 from drf_extra_fields.fields import Base64ImageField
 
-from recipes.models import Tag, Recipe, Ingredient, AmountIngredient
+from recipes.models import Tag, Recipe, Ingredient, AmountIngredient, Cart
 
 User = get_user_model()
 
@@ -79,11 +79,26 @@ class IngredientSerializer(serializers.ModelSerializer):
         read_only_fields = ('id', 'name', 'measurement_unit')
         model = Ingredient
 
+class IngredientAmountListSerializer(serializers.ModelSerializer):
+    id = serializers.ReadOnlyField(
+        source='ingredients.id',
+    )
+    name = serializers.ReadOnlyField(
+        source='ingredients.name',
+    )
+    measurement_unit = serializers.ReadOnlyField(
+        source='ingredients.measurement_unit',
+    )
+
+    class Meta:
+        model = AmountIngredient
+        fields = ('id', 'name', 'measurement_unit', 'amount')
+
 
 class RecipeListSerializer(serializers.ModelSerializer):
     tags = TagSerializer(many=True)
     author = UserSerializer(read_only=True)
-    ingredients = serializers.SerializerMethodField()
+    ingredients = IngredientAmountListSerializer(many=True)
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
     image = Base64ImageField()
@@ -106,12 +121,6 @@ class RecipeListSerializer(serializers.ModelSerializer):
         )
         model = Recipe
 
-    def get_ingredients(self, obj):
-        ingredients = obj.ingredients.values(
-            'id', 'name', 'measurement_unit', amount=F('ingredient__amount')
-        )
-        return ingredients
-
     def get_is_favorited(self, obj):
         user = self.context.get('request').user
         return False if user.is_anonymous else user.favorites.filter(
@@ -119,8 +128,8 @@ class RecipeListSerializer(serializers.ModelSerializer):
 
     def get_is_in_shopping_cart(self, obj):
         user = self.context.get('request').user
-        return False if user.is_anonymous else user.carts.filter(
-            id=obj.id).exists()
+        return False if user.is_anonymous else Cart.objects.filter(
+            user=user).exists()
 
 
 class IngredientRecipeCreateSerializer(serializers.ModelSerializer):
@@ -143,17 +152,18 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
     )
     ingredients = IngredientRecipeCreateSerializer(many=True)
     image = Base64ImageField()
+    name = serializers.CharField(
+        validators=[
+            UniqueValidator(
+                queryset=Recipe.objects.all(),
+            )
+        ]
+    )
 
     class Meta:
         model = Recipe
         fields = ('ingredients', 'tags', 'image',
                   'name', 'text', 'cooking_time', 'author')
-        validators = [
-            UniqueTogetherValidator(
-                queryset=Recipe.objects.all().select_related('author'),
-                fields=['author', 'name']
-            )
-        ]
 
     def create(self, validated_data):
         ingredients = validated_data.pop('ingredients')
@@ -164,9 +174,10 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
             id = ingredient.get('id')
             amount = ingredient.get('amount')
             ingredient_id = get_object_or_404(Ingredient, id=id)
-            AmountIngredient.objects.create(
-                recipe=recipe, ingredients=ingredient_id, amount=amount
+            add_ingredient = AmountIngredient.objects.create(
+                ingredients=ingredient_id, amount=amount
             )
+            recipe.ingredients.add(add_ingredient)
         recipe.save()
         return recipe
 
@@ -193,8 +204,7 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
                 ingredient_object = get_object_or_404(
                     Ingredient, id=ingredient_id)
                 instance.ingredients.add(
-                    ingredient_object,
-                    through_defaults={'amount': amount}
+                    ingredient_object, amount=amount
                 )
         instance.save()
         return instance

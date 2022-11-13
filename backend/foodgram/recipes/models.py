@@ -62,6 +62,29 @@ class Ingredient(models.Model):
         return f'{self.name}, {self.measurement_unit}'
 
 
+class AmountIngredient(models.Model):
+    ingredients = models.ForeignKey(
+        Ingredient,
+        verbose_name='Связанные ингредиенты',
+        on_delete=models.CASCADE,
+        related_name='+',
+    )
+    amount = models.PositiveSmallIntegerField(
+        verbose_name='Количество',
+        validators=(
+            MinValueValidator(
+                1, 'Нужно указать количество.'
+            ),
+            MaxValueValidator(
+                10000, 'Слишком большое количество'
+            ),
+        )
+    )
+
+    def __str__(self):
+        return f'{self.ingredients.name} - {self.amount}{self.ingredients.measurement_unit}'
+
+
 class Recipe(models.Model):
     author = models.ForeignKey(
         User,
@@ -88,10 +111,8 @@ class Recipe(models.Model):
         max_length=MAX_LEN_RECIPES_TEXTFIELD
     )
     ingredients = models.ManyToManyField(
-        Ingredient,
-        through='recipes.AmountIngredient',
-        verbose_name='Ингридиенты для рецепта',
-        related_name='+'
+        AmountIngredient,
+        symmetrical=False,
     )
     tags = models.ManyToManyField(
         Tag,
@@ -129,59 +150,25 @@ class Recipe(models.Model):
         return f'{self.name}. Автор: {self.author.username}'
 
 
-class AmountIngredient(models.Model):
+class Cart(models.Model):
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='cart',
+        verbose_name='Пользователь',
+    )
     recipe = models.ForeignKey(
         Recipe,
-        verbose_name='В каких рецептах',
         on_delete=models.CASCADE,
-        related_name='+',
-    )
-    ingredients = models.ForeignKey(
-        Ingredient,
-        verbose_name='Связанные ингредиенты',
-        on_delete=models.CASCADE,
-        related_name='+',
-    )
-    amount = models.PositiveSmallIntegerField(
-        verbose_name='Количество',
-        validators=(
-            MinValueValidator(
-                1, 'Нужно указать количество.'
-            ),
-            MaxValueValidator(
-                10000, 'Слишком большое количество'
-            ),
-        )
+        related_name='cart',
+        verbose_name='Рецепт',
     )
 
     class Meta:
-        constraints = (
-            models.UniqueConstraint(
-                fields=('recipe', 'ingredients', ),
-                name='%(app_label)s_%(class)s ingredient alredy added\n',
-            ),
-        )
-
-
-# class Cart(models.Model):
-#     user = models.ForeignKey(
-#         User,
-#         on_delete=models.CASCADE,
-#         related_name='cart',
-#         verbose_name='Пользователь',
-#     )
-#     recipe = models.ForeignKey(
-#         Recipe,
-#         on_delete=models.CASCADE,
-#         related_name='cart',
-#         verbose_name='Рецепт',
-#     )
-
-#     class Meta:
-#         ordering = ['-id']
-#         verbose_name = 'Корзина'
-#         verbose_name_plural = 'В корзине'
-#         constraints = [
-#             models.UniqueConstraint(fields=['user', 'recipe'],
-#                                     name='unique cart user')
-#         ]
+        ordering = ['-id']
+        verbose_name = 'Корзина'
+        verbose_name_plural = 'В корзине'
+        constraints = [
+            models.UniqueConstraint(fields=['user', 'recipe'],
+                                    name='unique cart user')
+        ]

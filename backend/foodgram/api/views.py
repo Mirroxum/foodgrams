@@ -11,7 +11,7 @@ from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from recipes.models import Ingredient, Recipe, Tag, AmountIngredient
+from recipes.models import Ingredient, Recipe, Tag, AmountIngredient, Cart
 from .serializers import (TagSerializer, IngredientSerializer,
                           RecipeCreateSerializer, UserSubscribeSerializer,
                           ShortRecipeSerializer)
@@ -68,7 +68,7 @@ class UserSubscribeViewSet(GenericViewSet):
     @action(detail=False, permission_classes=[IsAuthenticated, ])
     def subscriptions(self, request):
         user = request.user
-        queryset = User.objects.filter(subscribers__in=[user])
+        queryset = user.subscribe
         pages = self.paginate_queryset(queryset)
         serializer = self.get_serializer(
             pages,
@@ -82,7 +82,7 @@ class TagViewSet(ReadOnlyModelViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
     permission_classes = (IsAdminOrReadOnly, )
-    pagination_class = PageLimitPagination
+    pagination_class = None
 
 
 class IngredientViewSet(ReadOnlyModelViewSet):
@@ -136,12 +136,12 @@ class RecipeViewSet(ModelViewSet):
     def shopping_cart(self, request, pk):
         user = self.request.user
         recipe = get_object_or_404(Recipe, pk=pk)
-        is_cart = recipe.carts.filter(id=user.id).exists()
+        is_cart = Cart.objects.filter(user=user, recipe=recipe).exists()
         if is_cart:
             return Response({
                 'errors': 'Вы уже добавили этот рецепт в список покупок'
             }, status=status.HTTP_400_BAD_REQUEST)
-        user.cart.add(recipe)
+        Cart.objects.create(user=user, recipe=recipe)
         serializer = ShortRecipeSerializer(recipe)
         return Response(
             data=serializer.data,
@@ -152,11 +152,11 @@ class RecipeViewSet(ModelViewSet):
     def del_shopping_cart(self, request, pk):
         user = self.request.user
         recipe = get_object_or_404(Recipe, pk=pk)
-        is_cart = recipe.carts.filter(id=user.id).exists()
+        is_cart = Cart.objects.filter(user=user, recipe=recipe).exists()
         if not is_cart:
             data = {'errors': 'Такого рецепта нет в списке покупок.'}
             return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
-        user.cart.remove(recipe)
+        Cart.objects.filter(user=user, recipe=recipe).delete()
         return Response({
             'success': 'Рецепт успешно удален из списка покупок'
         }, status=status.HTTP_204_NO_CONTENT)
@@ -166,10 +166,10 @@ class RecipeViewSet(ModelViewSet):
             permission_classes=[IsAuthenticated])
     def download_shopping_cart(self, request):
         user = self.request.user
-        if not user.carts.exists():
+        if not Cart.objects.filter(user=user).exists():
             return Response(status=status.HTTP_400_BAD_REQUEST)
         ingredients = AmountIngredient.objects.filter(
-            recipe__in=(user.carts.values('id'))
+            recipe__cart__user=user
         ).values(
             ingredient=F('ingredients__name'),
             measure=F('ingredients__measurement_unit')

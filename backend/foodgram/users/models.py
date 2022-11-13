@@ -29,15 +29,11 @@ class User(AbstractUser):
         help_text=conf.USERS_HELP_FNAME
     )
     subscribe = models.ManyToManyField(
+        blank=True,
         to='self',
         verbose_name='Подписка',
         symmetrical=False
     )
-    # cart = models.ManyToManyField(
-    #     verbose_name='Список покупок',
-    #     related_name='carts',
-    #     to=Recipe
-    # )
 
     class Meta:
         verbose_name = 'Пользователь'
