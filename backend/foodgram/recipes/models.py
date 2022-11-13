@@ -2,8 +2,9 @@ from django.contrib.auth import get_user_model
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
+from .validators import is_hex_color
 from foodgram.conf import MAX_LEN_RECIPES_CHARFIELD, MAX_LEN_RECIPES_TEXTFIELD
-# from users.models import User
+
 User = get_user_model()
 
 
@@ -14,6 +15,7 @@ class Tag(models.Model):
         unique=True,
     )
     color = models.CharField(
+        validators=[is_hex_color],
         verbose_name='Цветовой HEX-код',
         max_length=7,
         blank=True,
@@ -89,10 +91,12 @@ class Recipe(models.Model):
         Ingredient,
         through='recipes.AmountIngredient',
         verbose_name='Ингридиенты для рецепта',
+        related_name='+'
     )
     tags = models.ManyToManyField(
         Tag,
         verbose_name='Теги',
+        related_name='+'
     )
     pub_date = models.DateTimeField(
         verbose_name='Дата публикации',
@@ -130,11 +134,13 @@ class AmountIngredient(models.Model):
         Recipe,
         verbose_name='В каких рецептах',
         on_delete=models.CASCADE,
+        related_name='+',
     )
     ingredients = models.ForeignKey(
         Ingredient,
         verbose_name='Связанные ингредиенты',
         on_delete=models.CASCADE,
+        related_name='+',
     )
     amount = models.PositiveSmallIntegerField(
         verbose_name='Количество',
@@ -155,3 +161,27 @@ class AmountIngredient(models.Model):
                 name='%(app_label)s_%(class)s ingredient alredy added\n',
             ),
         )
+
+
+# class Cart(models.Model):
+#     user = models.ForeignKey(
+#         User,
+#         on_delete=models.CASCADE,
+#         related_name='cart',
+#         verbose_name='Пользователь',
+#     )
+#     recipe = models.ForeignKey(
+#         Recipe,
+#         on_delete=models.CASCADE,
+#         related_name='cart',
+#         verbose_name='Рецепт',
+#     )
+
+#     class Meta:
+#         ordering = ['-id']
+#         verbose_name = 'Корзина'
+#         verbose_name_plural = 'В корзине'
+#         constraints = [
+#             models.UniqueConstraint(fields=['user', 'recipe'],
+#                                     name='unique cart user')
+#         ]

@@ -1,13 +1,10 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
-from recipes.models import Recipe
 from foodgram import conf
 
 
 class User(AbstractUser):
-    USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['username', 'first_name', 'last_name']
 
     email = models.EmailField(
         verbose_name='Адрес электронной почты',
@@ -36,11 +33,11 @@ class User(AbstractUser):
         verbose_name='Подписка',
         symmetrical=False
     )
-    cart = models.ManyToManyField(
-        verbose_name='Список покупок',
-        related_name='carts',
-        to=Recipe
-    )
+    # cart = models.ManyToManyField(
+    #     verbose_name='Список покупок',
+    #     related_name='carts',
+    #     to=Recipe
+    # )
 
     class Meta:
         verbose_name = 'Пользователь'

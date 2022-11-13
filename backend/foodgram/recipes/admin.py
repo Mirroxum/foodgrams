@@ -1,4 +1,6 @@
-from django.contrib.admin import ModelAdmin, TabularInline, register, site
+from django.contrib.admin import (ModelAdmin, TabularInline,
+                                  register, site)
+from django.utils.html import format_html
 
 from .models import AmountIngredient, Ingredient, Recipe, Tag
 from foodgram.conf import EMPTY_VALUE
@@ -55,10 +57,17 @@ class RecipeAdmin(ModelAdmin):
 @register(Tag)
 class TagAdmin(ModelAdmin):
     list_display = (
-        'name', 'color', 'slug',
+        'name', 'color', 'colored', 'slug', 
     )
     search_fields = (
         'name', 'color'
     )
     save_on_top = True
     empty_value_display = EMPTY_VALUE
+
+    def colored(self, obj):
+        return format_html(
+            f'<span style="background: {obj.color};'
+            f'color: {obj.color}";>___________</span>'
+        )
+    colored.short_description = 'Цвет'

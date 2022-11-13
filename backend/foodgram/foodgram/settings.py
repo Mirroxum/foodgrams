@@ -9,6 +9,9 @@ DEBUG = True
 ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
 INSTALLED_APPS = [
+    'recipes.apps.RecipesConfig',
+    'users.apps.UsersConfig',
+    'api.apps.ApiConfig',
     'rest_framework',
     'rest_framework.authtoken',
     'django_filters',
@@ -19,9 +22,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'djoser',
-    'django_extensions',
-    'api.apps.ApiConfig',
-    'recipes.apps.RecipesConfig',
+    'django_extensions'
 ]
 
 MIDDLEWARE = [
@@ -64,24 +65,24 @@ DATABASES = {
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': ['django.contrib.auth.',
-                 'password_validation.UserAttributeSimilarityValidator'],
+        'NAME': 'django.contrib.auth.password_validation.\
+UserAttributeSimilarityValidator',
     },
     {
-        'NAME': ['django.contrib.',
-                 'auth.password_validation.MinimumLengthValidator'],
+        'NAME': 'django.contrib.auth.password_validation.\
+MinimumLengthValidator',
     },
     {
-        'NAME': ['django.contrib.auth.',
-                 'password_validation.CommonPasswordValidator'],
+        'NAME': 'django.contrib.auth.password_validation.\
+CommonPasswordValidator',
     },
     {
-        'NAME': ['django.contrib.auth.',
-                 'password_validation.NumericPasswordValidator'],
+        'NAME': 'django.contrib.auth.password_validation.\
+NumericPasswordValidator',
     },
 ]
 
-AUTH_USER_MODEL = 'recipes.User'
+AUTH_USER_MODEL = 'users.User'
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES':
