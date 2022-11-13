@@ -57,7 +57,7 @@ class RecipeAdmin(ModelAdmin):
 @register(Tag)
 class TagAdmin(ModelAdmin):
     list_display = (
-        'name', 'color', 'colored', 'slug', 
+        'name', 'color', 'colored', 'slug',
     )
     search_fields = (
         'name', 'color'
