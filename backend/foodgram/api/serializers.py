@@ -1,6 +1,5 @@
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
-from django.db.models import F
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 from drf_extra_fields.fields import Base64ImageField
@@ -78,6 +77,7 @@ class IngredientSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'measurement_unit')
         read_only_fields = ('id', 'name', 'measurement_unit')
         model = Ingredient
+
 
 class IngredientAmountListSerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField(
@@ -189,14 +189,11 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
             'cooking_time', instance.cooking_time
         )
         if validated_data.get('tags'):
-            tags_data = validated_data.pop('tags')
+            tags_data = validated_data.get('tags')
             instance.tags.clear()
-            for tag in tags_data:
-                tag_id = tag.id
-                tag_object = get_object_or_404(Tag, id=tag_id)
-                instance.tags.add(tag_object)
+            instance.tags.set(tags_data)
         if validated_data.get('ingredients'):
-            ingredients_data = validated_data.pop('ingredients')
+            ingredients_data = validated_data.get('ingredients')
             instance.ingredients.clear()
             for ingredient in ingredients_data:
                 ingredient_id = ingredient.get('id')
@@ -204,7 +201,8 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
                 ingredient_object = get_object_or_404(
                     Ingredient, id=ingredient_id)
                 instance.ingredients.add(
-                    ingredient_object, amount=amount
+                    AmountIngredient.objects.create(
+                        ingredients=ingredient_object, amount=amount),
                 )
         instance.save()
         return instance

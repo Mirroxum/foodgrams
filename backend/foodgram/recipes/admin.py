@@ -7,9 +7,12 @@ from foodgram.conf import EMPTY_VALUE
 
 site.site_header = 'Администрирование Foodgram'
 
+
 class IngredientInline(TabularInline):
     model = Recipe.ingredients.through
     extra = 3
+
+
 @register(Ingredient)
 class IngredientAdmin(ModelAdmin):
     list_display = (
@@ -32,7 +35,7 @@ class RecipeAdmin(ModelAdmin):
     )
     fields = (
         ('name', 'cooking_time',),
-        ('author','tags',),
+        ('author', 'tags',),
         ('text',),
         ('image',),
     )
@@ -43,7 +46,7 @@ class RecipeAdmin(ModelAdmin):
     list_filter = (
         'name', 'author__username', 'tags'
     )
-    inlines = [IngredientInline,]
+    inlines = [IngredientInline, ]
     save_on_top = True
     empty_value_display = EMPTY_VALUE
 
@@ -68,5 +71,6 @@ class TagAdmin(ModelAdmin):
             f'color: {obj.color}";>___________</span>'
         )
     colored.short_description = 'Цвет'
+
 
 site.register(AmountIngredient)

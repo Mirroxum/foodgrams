@@ -5,6 +5,12 @@ from foodgram import conf
 
 
 class User(AbstractUser):
+    USERNAME_FIELD = "email"
+    REQUIRED_FIELDS = [
+        "username",
+        "first_name",
+        "last_name",
+    ]
 
     email = models.EmailField(
         verbose_name='Адрес электронной почты',

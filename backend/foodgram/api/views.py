@@ -15,7 +15,7 @@ from recipes.models import Ingredient, Recipe, Tag, AmountIngredient, Cart
 from .serializers import (TagSerializer, IngredientSerializer,
                           RecipeCreateSerializer, UserSubscribeSerializer,
                           ShortRecipeSerializer)
-from .permissions import IsAdminOrReadOnly, IsAuthorModeratorAdminOrReadOnly
+from .permissions import IsAdminOrReadOnly
 from .paginators import PageLimitPagination
 
 User = get_user_model()
@@ -68,7 +68,7 @@ class UserSubscribeViewSet(GenericViewSet):
     @action(detail=False, permission_classes=[IsAuthenticated, ])
     def subscriptions(self, request):
         user = request.user
-        queryset = user.subscribe
+        queryset = user.subscribe.all()
         pages = self.paginate_queryset(queryset)
         serializer = self.get_serializer(
             pages,
@@ -95,9 +95,8 @@ class IngredientViewSet(ReadOnlyModelViewSet):
 class RecipeViewSet(ModelViewSet):
     queryset = Recipe.objects.select_related('author')
     serializer_class = RecipeCreateSerializer
-    permission_classes = (IsAuthorModeratorAdminOrReadOnly, )
+    permission_classes = (IsAuthenticated, )
     pagination_class = PageLimitPagination
-    http_method_names = ['get', 'post', 'patch', 'delete', 'head', 'options']
 
     @action(methods=['post'],
             detail=True,
