@@ -5,11 +5,11 @@ from foodgram import conf
 
 
 class User(AbstractUser):
-    USERNAME_FIELD = "email"
+    USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = [
-        "username",
-        "first_name",
-        "last_name",
+        'username',
+        'first_name',
+        'last_name',
     ]
 
     email = models.EmailField(
@@ -35,7 +35,6 @@ class User(AbstractUser):
         help_text=conf.USERS_HELP_FNAME
     )
     subscribe = models.ManyToManyField(
-        blank=True,
         to='self',
         verbose_name='Подписка',
         symmetrical=False

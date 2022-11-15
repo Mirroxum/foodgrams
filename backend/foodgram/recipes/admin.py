@@ -9,7 +9,7 @@ site.site_header = 'Администрирование Foodgram'
 
 
 class IngredientInline(TabularInline):
-    model = Recipe.ingredients.through
+    model = AmountIngredient
     extra = 3
 
 

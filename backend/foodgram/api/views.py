@@ -30,29 +30,26 @@ class UserSubscribeViewSet(GenericViewSet):
             methods=['post'],
             permission_classes=[IsAuthenticated])
     def subscribe(self, request, pk=None):
-        user = request.user
         author = get_object_or_404(User, id=pk)
-        if user == author:
+        if request.user == author:
             return Response({
                 'errors': 'Вы не можете подписываться на самого себя'
             }, status=status.HTTP_400_BAD_REQUEST)
-        if user.subscribe.filter(id=author.id).exists():
+        if request.user.subscribe.filter(id=author.id).exists():
             return Response({
                 'errors': 'Вы уже подписаны на данного пользователя'
             }, status=status.HTTP_400_BAD_REQUEST)
-        user.subscribe.add(author)
-        follow = user.subscribe.get(id=author.id)
+        request.user.subscribe.add(author)
         serializer = self.get_serializer(
-            follow, context={'request': request}
+            author, context={'request': request}
         )
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     @subscribe.mapping.delete
     def del_subscribe(self, request, pk=None):
-        user = request.user
         author = get_object_or_404(User, id=pk)
-        is_subscribe = user.subscribe.filter(id=author.id).exists()
-        if user == author:
+        is_subscribe = request.user.subscribe.filter(id=author.id).exists()
+        if request.user == author:
             return Response({
                 'errors': 'Вы не можете отписываться от самого себя'
             }, status=status.HTTP_400_BAD_REQUEST)
@@ -60,15 +57,14 @@ class UserSubscribeViewSet(GenericViewSet):
             return Response({
                 'errors': 'Вы уже отписались'
             }, status=status.HTTP_400_BAD_REQUEST)
-        user.subscribe.remove(author)
+        request.user.subscribe.remove(author)
         return Response({
             'success': 'Успешная отписка'
         }, status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=False, permission_classes=[IsAuthenticated, ])
     def subscriptions(self, request):
-        user = request.user
-        queryset = user.subscribe.all()
+        queryset = request.user.subscribe.all()
         pages = self.paginate_queryset(queryset)
         serializer = self.get_serializer(
             pages,
@@ -176,9 +172,10 @@ class RecipeViewSet(ModelViewSet):
         filename = f'{user.username}_shopping_list.txt'
         shopping_list = [f'Список покупок для:\n{user.first_name}',
                          '{user.last_name}\n\n']
-        for i, ing in enumerate(ingredients, start=1):
+        for number, ingredient in enumerate(ingredients, start=1):
             shopping_list += (
-                f'{i}){ing["ingredient"]}: {ing["amount"]} {ing["measure"]}\n'
+                f'{number}){ingredient["ingredient"]}:\
+{ingredient["amount"]} {ingredient["measure"]}\n'
             )
         shopping_list += ['\n\nПосчитано в Foodgram\n',
                           f'{dt.now().strftime("%d/%m/%Y %H:%M")}']

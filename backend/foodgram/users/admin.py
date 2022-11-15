@@ -6,7 +6,7 @@ from foodgram.conf import EMPTY_VALUE
 
 
 @register(User)
-class MyUserAdmin(UserAdmin):
+class UserAdmin(UserAdmin):
     list_display = (
         'username', 'first_name', 'last_name', 'email',
     )

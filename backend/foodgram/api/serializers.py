@@ -21,10 +21,8 @@ class UserSerializer(serializers.ModelSerializer):
             'first_name',
             'last_name',
             'is_subscribed',
-            'password'
         )
-        extra_kwargs = {'password': {'write_only': True}}
-        read_only_fields = ('is_subscribed', )
+        read_only_fields = '__all__',
 
     def get_is_subscribed(self, obj):
         user = self.context.get('request').user
@@ -175,7 +173,7 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
             amount = ingredient.get('amount')
             ingredient_id = get_object_or_404(Ingredient, id=id)
             add_ingredient = AmountIngredient.objects.create(
-                ingredients=ingredient_id, amount=amount
+                recipe=recipe, ingredients=ingredient_id, amount=amount
             )
             recipe.ingredients.add(add_ingredient)
         recipe.save()
@@ -194,16 +192,16 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
             instance.tags.set(tags_data)
         if validated_data.get('ingredients'):
             ingredients_data = validated_data.get('ingredients')
-            instance.ingredients.clear()
+            AmountIngredient.objects.filter(recipe=instance).delete()
             for ingredient in ingredients_data:
                 ingredient_id = ingredient.get('id')
                 amount = ingredient.get('amount')
                 ingredient_object = get_object_or_404(
                     Ingredient, id=ingredient_id)
-                instance.ingredients.add(
-                    AmountIngredient.objects.create(
-                        ingredients=ingredient_object, amount=amount),
-                )
+                AmountIngredient.objects.create(
+                    recipe=instance,
+                    ingredients=ingredient_object,
+                    amount=amount),
         instance.save()
         return instance
 

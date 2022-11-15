@@ -62,30 +62,6 @@ class Ingredient(models.Model):
         return f'{self.name}, {self.measurement_unit}'
 
 
-class AmountIngredient(models.Model):
-    ingredients = models.ForeignKey(
-        Ingredient,
-        verbose_name='Связанные ингредиенты',
-        on_delete=models.CASCADE,
-        related_name='+',
-    )
-    amount = models.PositiveSmallIntegerField(
-        verbose_name='Количество',
-        validators=(
-            MinValueValidator(
-                1, 'Нужно указать количество.'
-            ),
-            MaxValueValidator(
-                10000, 'Слишком большое количество'
-            ),
-        )
-    )
-
-    def __str__(self):
-        return f'{self.ingredients.name} - {self.amount}\
-{self.ingredients.measurement_unit}'
-
-
 class Recipe(models.Model):
     author = models.ForeignKey(
         User,
@@ -110,10 +86,6 @@ class Recipe(models.Model):
     text = models.TextField(
         verbose_name='Описание',
         max_length=MAX_LEN_RECIPES_TEXTFIELD
-    )
-    ingredients = models.ManyToManyField(
-        AmountIngredient,
-        symmetrical=False,
     )
     tags = models.ManyToManyField(
         Tag,
@@ -151,11 +123,45 @@ class Recipe(models.Model):
         return f'{self.name}. Автор: {self.author.username}'
 
 
+class AmountIngredient(models.Model):
+    recipe = models.ForeignKey(
+        Recipe,
+        verbose_name='Связанный рецепт',
+        on_delete=models.CASCADE,
+        related_name='ingredients',
+    )
+    ingredients = models.ForeignKey(
+        Ingredient,
+        verbose_name='Связанный ингредиент',
+        on_delete=models.CASCADE,
+        related_name='+',
+    )
+    amount = models.PositiveSmallIntegerField(
+        verbose_name='Количество',
+        validators=(
+            MinValueValidator(
+                1, 'Нужно указать количество.'
+            ),
+            MaxValueValidator(
+                10000, 'Слишком большое количество'
+            ),
+        )
+    )
+
+    class Meta:
+        verbose_name = 'Связаный ингредиент'
+        verbose_name_plural = 'Связаные ингредиенты'
+
+    def __str__(self):
+        return f'{self.ingredients.name} - {self.amount}\
+{self.ingredients.measurement_unit}'
+
+
 class Cart(models.Model):
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='cart',
+        related_name='+',
         verbose_name='Пользователь',
     )
     recipe = models.ForeignKey(
