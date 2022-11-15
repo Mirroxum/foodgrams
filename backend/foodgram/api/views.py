@@ -94,6 +94,30 @@ class RecipeViewSet(ModelViewSet):
     permission_classes = (IsAuthenticated, )
     pagination_class = PageLimitPagination
 
+    def get_queryset(self):
+        queryset = self.queryset
+        tags = self.request.query_params.getlist('tags')
+        if tags:
+            queryset = queryset.filter(
+                tags__slug__in=tags).distinct()
+        author = self.request.query_params.get('author')
+        if author:
+            queryset = queryset.filter(author=author)
+        user = self.request.user
+        if user.is_anonymous:
+            return queryset
+        is_in_shopping = self.request.query_params.get('is_in_shopping_cart')
+        if is_in_shopping in ('1', 'true',):
+            queryset = queryset.filter(cart__user=user)
+        elif is_in_shopping in ('0', 'false',):
+            queryset = queryset.exclude(cart__user=user)
+        is_favorited = self.request.query_params.get('is_favorited')
+        if is_favorited in ('1', 'true',):
+            queryset = queryset.filter(favorite=user)
+        if is_favorited in ('0', 'false',):
+            queryset = queryset.exclude(favorite=user)
+        return queryset
+
     @action(methods=['post'],
             detail=True,
             permission_classes=[IsAuthenticated])
