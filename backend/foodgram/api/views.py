@@ -131,12 +131,12 @@ class RecipeViewSet(ModelViewSet):
     def shopping_cart(self, request, pk):
         user = self.request.user
         recipe = get_object_or_404(Recipe, pk=pk)
-        is_cart = Cart.objects.filter(user=user, recipe=recipe).exists()
+        is_cart = user.cart.filter(recipe=recipe).exists()
         if is_cart:
             return Response({
                 'errors': 'Вы уже добавили этот рецепт в список покупок'
             }, status=status.HTTP_400_BAD_REQUEST)
-        Cart.objects.create(user=user, recipe=recipe)
+        user.cart.create(recipe=recipe)
         serializer = ShortRecipeSerializer(recipe)
         return Response(
             data=serializer.data,
@@ -147,11 +147,11 @@ class RecipeViewSet(ModelViewSet):
     def del_shopping_cart(self, request, pk):
         user = self.request.user
         recipe = get_object_or_404(Recipe, pk=pk)
-        is_cart = Cart.objects.filter(user=user, recipe=recipe).exists()
+        is_cart = user.cart.filter(recipe=recipe).exists()
         if not is_cart:
             data = {'errors': 'Такого рецепта нет в списке покупок.'}
             return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
-        Cart.objects.filter(user=user, recipe=recipe).delete()
+        user.cart.filter(recipe=recipe).delete()
         return Response({
             'success': 'Рецепт успешно удален из списка покупок'
         }, status=status.HTTP_204_NO_CONTENT)
