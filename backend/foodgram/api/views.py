@@ -11,7 +11,7 @@ from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from recipes.models import Ingredient, Recipe, Tag, AmountIngredient, Cart
+from recipes.models import Ingredient, Recipe, Tag
 from .serializers import (TagSerializer, IngredientSerializer,
                           RecipeCreateSerializer, UserSubscribeSerializer,
                           ShortRecipeSerializer)
@@ -184,18 +184,16 @@ class RecipeViewSet(ModelViewSet):
             detail=False,
             permission_classes=[IsAuthenticated])
     def download_shopping_cart(self, request):
-        user = self.request.user
-        if not Cart.objects.filter(user=user).exists():
+        user = request.user
+        if not user.cart.exists():
             return Response(status=status.HTTP_400_BAD_REQUEST)
-        ingredients = AmountIngredient.objects.filter(
-            recipe__cart__user=user
-        ).values(
-            ingredient=F('ingredients__name'),
-            measure=F('ingredients__measurement_unit')
-        ).annotate(amount=Sum('amount'))
+        ingredients = user.cart.values(
+            ingredient=F('recipe__ingredients__ingredient__name'),
+            measure=F('recipe__ingredients__ingredient__measurement_unit')
+        ).annotate(amount=Sum('recipe__ingredients__amount'))
         filename = f'{user.username}_shopping_list.txt'
-        shopping_list = [f'Список покупок для:\n{user.first_name}',
-                         '{user.last_name}\n\n']
+        shopping_list = [f'Список покупок для:\n{user.first_name} ',
+                         f'{user.last_name}\n\n']
         for number, ingredient in enumerate(ingredients, start=1):
             shopping_list += (
                 f'{number}){ingredient["ingredient"]}:\

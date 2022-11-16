@@ -76,7 +76,7 @@ class Recipe(models.Model):
     )
     image = models.ImageField(
         verbose_name='Изображение для рецепта',
-        upload_to='media/recipes/images/',
+        upload_to='recipes/images/',
     )
     favorite = models.ManyToManyField(
         User,
@@ -130,11 +130,11 @@ class AmountIngredient(models.Model):
         on_delete=models.CASCADE,
         related_name='ingredients',
     )
-    ingredients = models.ForeignKey(
+    ingredient = models.ForeignKey(
         Ingredient,
         verbose_name='Связанный ингредиент',
         on_delete=models.CASCADE,
-        related_name='+',
+        related_name='ingredients',
     )
     amount = models.PositiveSmallIntegerField(
         verbose_name='Количество',
@@ -153,8 +153,8 @@ class AmountIngredient(models.Model):
         verbose_name_plural = 'Связаные ингредиенты'
 
     def __str__(self):
-        return f'{self.ingredients.name} - {self.amount}\
-{self.ingredients.measurement_unit}'
+        return f'{self.ingredient.name} - {self.amount}\
+{self.ingredient.measurement_unit}'
 
 
 class Cart(models.Model):

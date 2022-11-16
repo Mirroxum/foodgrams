@@ -79,13 +79,13 @@ class IngredientSerializer(serializers.ModelSerializer):
 
 class IngredientAmountListSerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField(
-        source='ingredients.id',
+        source='ingredient.id',
     )
     name = serializers.ReadOnlyField(
-        source='ingredients.name',
+        source='ingredient.name',
     )
     measurement_unit = serializers.ReadOnlyField(
-        source='ingredients.measurement_unit',
+        source='ingredient.measurement_unit',
     )
 
     class Meta:
@@ -173,7 +173,7 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
             amount = ingredient.get('amount')
             ingredient_id = get_object_or_404(Ingredient, id=id)
             add_ingredient = AmountIngredient.objects.create(
-                recipe=recipe, ingredients=ingredient_id, amount=amount
+                recipe=recipe, ingredient=ingredient_id, amount=amount
             )
             recipe.ingredients.add(add_ingredient)
         recipe.save()
@@ -200,7 +200,7 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
                     Ingredient, id=ingredient_id)
                 AmountIngredient.objects.create(
                     recipe=instance,
-                    ingredients=ingredient_object,
+                    ingredient=ingredient_object,
                     amount=amount),
         instance.save()
         return instance
