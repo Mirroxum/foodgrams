@@ -83,12 +83,12 @@ jobs:
         passphrase: ${{ secrets.HOST_PASS }}
         script: |
           sudo rm -rf foodgram
-          mkdir -p foodgram1
+          mkdir -p foodgram
     - name: Copy files
       uses: garygrossgarten/github-action-scp@release
       with:
           local: infra/
-          remote: /${{ secrets.HOST_USER }}/foodgram/
+          remote: /home/${{ secrets.HOST_USER }}/foodgram/
           host: ${{ secrets.HOST_IP }}
           username: ${{ secrets.HOST_USER }}
           privateKey: ${{ secrets.SSH_KEY }}
