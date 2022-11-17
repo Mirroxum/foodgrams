@@ -88,7 +88,7 @@ jobs:
       uses: garygrossgarten/github-action-scp@release
       with:
           local: infra/
-          remote: foodgram/
+          remote: /home/${{ secrets.HOST_USER }}/foodgram/
           host: ${{ secrets.HOST_IP }}
           username: ${{ secrets.HOST_USER }}
           privateKey: ${{ secrets.SSH_KEY }}
