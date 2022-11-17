@@ -8,9 +8,9 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 SECRET_KEY = os.getenv('SECRET_KEY', default='superYamDB84722')
 
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'backend']
+ALLOWED_HOSTS = ['backend']
 
 INSTALLED_APPS = [
     'recipes.apps.RecipesConfig',
