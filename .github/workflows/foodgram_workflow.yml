@@ -138,4 +138,3 @@ jobs:
           ${{ github.actor }}. Комментарий - ${{github.event.commits[0].message}}.
           https://github.com/${{ github.repository }}/commit/${{github.sha}}
 
-
