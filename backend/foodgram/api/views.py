@@ -1,4 +1,5 @@
 from datetime import datetime as dt
+from urllib.parse import unquote
 
 from django.contrib.auth import get_user_model
 from django.db.models import F, Sum
@@ -85,7 +86,21 @@ class IngredientViewSet(ReadOnlyModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
     permission_classes = (IsAdminOrReadOnly, )
-    pagination_class = PageLimitPagination
+    pagination_class = None
+
+    def get_queryset(self):
+        name = self.request.query_params.get('name')
+        queryset = self.queryset
+        if name:
+            name = unquote(name)
+            name = name.lower()
+            stw_queryset = list(queryset.filter(name__startswith=name))
+            cnt_queryset = queryset.filter(name__contains=name)
+            stw_queryset.extend(
+                [i for i in cnt_queryset if i not in stw_queryset]
+            )
+            queryset = stw_queryset
+        return queryset
 
 
 class RecipeViewSet(ModelViewSet):
@@ -108,9 +123,13 @@ class RecipeViewSet(ModelViewSet):
             return queryset
         is_in_shopping = self.request.query_params.get('is_in_shopping_cart')
         if is_in_shopping in ('1', 'true',):
-            queryset = queryset.filter(cart__user=user)
+            queryset = self.queryset.filter(id__in=user.cart.values_list(
+                'recipe', flat=True)
+                )
         elif is_in_shopping in ('0', 'false',):
-            queryset = queryset.exclude(cart__user=user)
+            queryset = self.queryset.exclude(id__in=user.cart.values_list(
+                'recipe', flat=True)
+                )
         is_favorited = self.request.query_params.get('is_favorited')
         if is_favorited in ('1', 'true',):
             queryset = queryset.filter(favorite=user)
