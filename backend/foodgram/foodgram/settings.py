@@ -10,7 +10,7 @@ SECRET_KEY = os.getenv('SECRET_KEY', default='superYamDB84722')
 
 DEBUG = False
 
-ALLOWED_HOSTS = ['backend']
+ALLOWED_HOSTS = ['*']
 
 INSTALLED_APPS = [
     'recipes.apps.RecipesConfig',
