@@ -1,12 +1,11 @@
-from django.contrib.admin import register
-from django.contrib.auth.admin import UserAdmin
+from django.contrib.admin import register, ModelAdmin
 
 from .models import User
 from foodgram.conf import EMPTY_VALUE
 
 
 @register(User)
-class UserAdmin(UserAdmin):
+class UserAdmin(ModelAdmin):
     list_display = (
         'username', 'first_name', 'last_name', 'email',
     )
