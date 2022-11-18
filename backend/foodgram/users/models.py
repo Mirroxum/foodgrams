@@ -2,7 +2,7 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 
 from foodgram import conf
-from .validators import (MinLenValidator, OneOfTwoValidator, 
+from .validators import (MinLenValidator, OneOfTwoValidator,
                          UsernameNotMeValidator)
 
 
