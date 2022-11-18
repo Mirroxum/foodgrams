@@ -42,9 +42,11 @@ class User(AbstractUser):
         help_text=conf.USERS_HELP_FNAME
     )
     subscribe = models.ManyToManyField(
+        blank=True,
+        null=True,
         to='self',
         verbose_name='Подписка',
-        symmetrical=False
+        symmetrical=False,
     )
 
     class Meta:

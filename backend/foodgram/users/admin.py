@@ -12,7 +12,8 @@ class UserAdmin(ModelAdmin):
 
     fields = (
         ('username', 'email',),
-        ('first_name', 'last_name', ),
+        ('first_name', 'last_name',),
+        ('password1','password2',),
         ('subscribe',),
     )
     fieldsets = []
