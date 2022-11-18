@@ -10,15 +10,13 @@ class UserAdmin(UserAdmin):
     list_display = (
         'username', 'first_name', 'last_name', 'email',
     )
-    fieldsets = (
-        (None, {'fields': ('email', 'password')}),
-        ('Personal info', {'fields': ('first_name', 'last_name')}),
-        ('Subscribe', {'fields': ('subscribe')}),
+
+    fields = (
+        ('username', 'email',),
+        ('first_name', 'last_name', ),
+        ('subscribe',),
     )
-    # add_fieldsets = (
-    #     (None, {
-    #         'classes': ('wide',),
-    #         'fields': ('email', 'password1', 'password2'), }),)
+    fieldsets = []
     search_fields = (
         'username', 'email',
     )
