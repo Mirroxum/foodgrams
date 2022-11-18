@@ -2,6 +2,8 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 
 from foodgram import conf
+from .validators import (MinLenValidator, OneOfTwoValidator, 
+                         UsernameNotMeValidator)
 
 
 class User(AbstractUser):
@@ -23,11 +25,16 @@ class User(AbstractUser):
         max_length=conf.MAX_LEN_USERS_CHARFIELD,
         unique=True,
         help_text=(conf.USERS_HELP_UNAME),
+        validators=(
+            MinLenValidator(),
+            OneOfTwoValidator(),
+            UsernameNotMeValidator(),
+        ),
     )
     first_name = models.CharField(
         verbose_name='Имя',
         max_length=conf.MAX_LEN_USERS_CHARFIELD,
-        help_text=conf.USERS_HELP_FNAME
+        help_text=conf.USERS_HELP_FNAME,
     )
     last_name = models.CharField(
         verbose_name='Фамилия',
