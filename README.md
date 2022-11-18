@@ -1,6 +1,6 @@
-![yamdb workflow](https://github.com/Mirroxum/foodgram-project-react/actions/workflows/foodgram_workflow.yml/badge.svg)
+![foodgram workflow](https://github.com/Mirroxum/foodgram-project-react/actions/workflows/foodgram_workflow.yml/badge.svg)
 
-### Краткое описание проекта YaMDb
+### Краткое описание проекта Foodgram
 
 Cайт Foodgram, «Продуктовый помощник». Онлайн-сервис и API для него. На этом сервисе пользователи смогут публиковать рецепты, подписываться на публикации других пользователей, добавлять понравившиеся рецепты в список «Избранное», а перед походом в магазин скачивать сводный список продуктов, необходимых для приготовления одного или нескольких выбранных блюд.
 
