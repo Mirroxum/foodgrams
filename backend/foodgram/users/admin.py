@@ -15,10 +15,10 @@ class UserAdmin(UserAdmin):
         ('Personal info', {'fields': ('first_name', 'last_name')}),
         ('Subscribe', {'fields': ('subscribe')}),
     )
-    add_fieldsets = (
-        (None, {
-            'classes': ('wide',),
-            'fields': ('email', 'password1', 'password2'), }),)
+    # add_fieldsets = (
+    #     (None, {
+    #         'classes': ('wide',),
+    #         'fields': ('email', 'password1', 'password2'), }),)
     search_fields = (
         'username', 'email',
     )
