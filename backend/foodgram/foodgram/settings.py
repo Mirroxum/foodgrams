@@ -10,7 +10,7 @@ SECRET_KEY = os.getenv('SECRET_KEY', default='superYamDB84722')
 
 DEBUG = False
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['51.250.74.213', 'foodgrams.zapto.org']
 
 INSTALLED_APPS = [
     'recipes.apps.RecipesConfig',

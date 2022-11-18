@@ -43,7 +43,6 @@ class User(AbstractUser):
     )
     subscribe = models.ManyToManyField(
         blank=True,
-        null=True,
         to='self',
         verbose_name='Подписка',
         symmetrical=False,

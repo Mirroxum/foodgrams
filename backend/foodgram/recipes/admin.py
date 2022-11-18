@@ -11,6 +11,7 @@ site.site_header = 'Администрирование Foodgram'
 class IngredientInline(TabularInline):
     model = AmountIngredient
     extra = 3
+    min_num = 1
 
 
 @register(Ingredient)
