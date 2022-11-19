@@ -163,6 +163,13 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         fields = ('ingredients', 'tags', 'image',
                   'name', 'text', 'cooking_time', 'author')
 
+    def validate_ingredients(self, ingredients):
+        for ingredient in ingredients:
+            amount = ingredient.get('amount')
+            if amount <= 0:
+                raise serializers.ValidationError('Введите правильное число.')
+        return ingredients
+
     def create(self, validated_data):
         ingredients = validated_data.pop('ingredients')
         tags = validated_data.pop('tags')

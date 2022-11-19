@@ -27,7 +27,6 @@ services:
   
   frontend:
     image: mirroxum/foodgram_front:latest
-    build: ../frontend/ 
     volumes:
       - ./frontend/:/app/result_build/
     depends_on:
