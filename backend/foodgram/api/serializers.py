@@ -141,6 +141,11 @@ class IngredientRecipeCreateSerializer(serializers.ModelSerializer):
             'amount'
         ]
 
+    def validate_amount(self, amount):
+        if amount <= 0:
+            raise serializers.ValidationError('Введите правильное число.')
+        return amount
+
 
 class RecipeCreateSerializer(serializers.ModelSerializer):
     author = serializers.HiddenField(default=serializers.CurrentUserDefault())
@@ -162,13 +167,6 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         model = Recipe
         fields = ('ingredients', 'tags', 'image',
                   'name', 'text', 'cooking_time', 'author')
-
-    def validate_ingredients(self, ingredients):
-        for ingredient in ingredients:
-            amount = ingredient.get('amount')
-            if amount <= 0:
-                raise serializers.ValidationError('Введите правильное число.')
-        return ingredients
 
     def create(self, validated_data):
         ingredients = validated_data.pop('ingredients')
