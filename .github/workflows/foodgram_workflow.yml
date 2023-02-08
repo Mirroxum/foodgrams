@@ -81,7 +81,7 @@ jobs:
         username: ${{ secrets.HOST_USER }}
         password: ${{ secrets.HOST_PASSWORD_WITHOUT_SSHKEY }}
         # key: ${{ secrets.SSH_KEY }}
-        # passphrase: ${{ secrets.HOST_PASS }}
+        # passphrase: ${{ secrets.HOST_PASS }} 
         script: |
           cd foodgram
           sudo docker-compose stop
