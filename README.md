@@ -9,11 +9,6 @@ Cайт Foodgram, «Продуктовый помощник». Онлайн-се
 http://51.250.74.213/
 http://foodgrams.zapto.org/
 ```
-Админ-панель:
-```
-e-mail: a@a.ru
-password: Admin
-```
 
 ### Стек технологий
 
