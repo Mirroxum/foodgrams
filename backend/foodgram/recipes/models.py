@@ -117,6 +117,10 @@ class Recipe(models.Model):
                 fields=('name', 'author', ),
                 name='unique_for_author'
             ),
+            models.CheckConstraint(
+                name="%(app_label)s_%(class)s_name_not_empty",
+                check=models.Q(ingredients__gt=0),
+            ),
         )
 
     def __str__(self):
